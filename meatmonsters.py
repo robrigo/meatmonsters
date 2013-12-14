@@ -5,6 +5,7 @@ import random
 import json
 import base64 
 import hashlib
+from random import choice
 from socketIO_client import SocketIO
 
 class Monster(object):
@@ -58,22 +59,27 @@ class MeatMonsters(object):
         post["message"] = data["chat"]["value"]["message"]
         return post
 
-    def get_message (self, reply):
+    def get_message (self, reply, image):
         message = {}
         message ['apiKey'] = self.api_key
         message ['message'] = reply
         message ['fingerprint'] = self.fingerprint
-        message ['picture'] = self.gif
+        message ['picture'] = image
         return message
 
-    def send_message (self, reply):
-        SocketIO(self.address).emit('message', self.get_message(reply))
+    def send_message (self, reply, image):
+        SocketIO(self.address).emit('message', self.get_message(reply, image))
 
     def on_message(self, *args):
         post = self.get_post (args[0])
         print post['message']
         if post['message'] == '!summon':
-            self.send_message ("SKREEEEEEEEEONGK!")
+            monster = choice(self.monsters)
+            self.send_message ("SKREEEEEEEEEONGK!", monster.appear_gif)
+        if post['message'] == '!attack':
+            monster = choice(self.monsters)
+            self.send_message ("SKREEEEEEEEEONGK!", monster.attack_gif)
+
 
 if __name__ == '__main__':
     game = MeatMonsters()
