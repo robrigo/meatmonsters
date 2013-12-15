@@ -1,7 +1,7 @@
 {
     "name" : "King Kong",
     "actions" : {
-            "appear":["[Kk]ing [Kk]ong"],
-            "attack":["[Kking [Kk]ong [Aa]ttack!"]
+            "appear":["^[Kk]ing [Kk]ong$"],
+            "attack":["[Kk]ing [Kk]ong [Aa]ttack!"]
     }
 } 
