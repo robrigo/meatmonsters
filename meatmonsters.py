@@ -1,4 +1,5 @@
 import os
+import glob
 import sys
 import re
 import random
@@ -43,15 +44,15 @@ class Monster(object):
         
         for action, triggers in self.config["actions"].items():
             if action not in self.actions:
-                self.actions[action] = {"gif":None, "txt":None}
+                self.actions[action] = {"gifs":[], "txts":[]}
 
-            gif_name = ".".join([action, "gif"])
-            gif_path = os.sep.join([files, gif_name])
-            self.actions[action]["gif"] = Monster.get_gif(gif_path)
+            gif_blob = os.sep.join([files, action]) + "*.gif"
+            for gif_path in glob.glob(gif_blob):
+                self.actions[action]["gifs"].append(Monster.get_gif(gif_path))
 
             txt_name = ".".join([action, "txt"])
             txt_path = os.sep.join([files, txt_name])
-            self.actions[action]["txt"] = Monster.get_txt(txt_path)
+            self.actions[action]["txts"] = Monster.get_txt(txt_path)
 
             for trigger in triggers:
                 compiled = re.compile(trigger)
@@ -61,8 +62,8 @@ class Monster(object):
         """return information for a called action"""
 
         values = {}
-        values["message"] = choice(self.actions[action]["txt"])
-        values["picture"] = self.actions[action]["gif"]
+        values["message"] = choice(self.actions[action]["txts"])
+        values["picture"] = choice(self.actions[action]["gifs"])
         return values
 
 class MeatMonsters(object):
