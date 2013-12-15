@@ -1,4 +1,7 @@
 {
     "name" : "Godzilla",
-    "triggers" : [{"[Gg]odzilla":"appear"}, {"[Aa]ttack":"attack"}]
-}
+    "actions" : [
+        {"appear":"["[Gg]odzilla"]},
+        {"attack":"["[Gg]odzilla [Aa]ttack!"]}
+   ]
+} 
