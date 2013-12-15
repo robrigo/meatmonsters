@@ -9,7 +9,14 @@ from random import choice
 from socketIO_client import SocketIO
 
 class Monster(object):
-    
+   
+    @staticmethod
+    def random_text (action):
+        source_file = ".".join([action, "txt"])
+        with open (filename, "r") as source_file:
+            lines = [line.rstrip() for line in source_file.read()]
+            return choice(lines)
+
     @staticmethod
     def get_gif (filename):
         with open (filename, "rb") as image_file:
@@ -17,33 +24,35 @@ class Monster(object):
             gif = "data:image/gif;base64," + data
             return gif
 
-    def __init__(self, name, files):
+    @staticmethod
+    def get_txt (filename):
+        with open (filename, "r") as text_file:
+            return text_file.read()
+
+    def __init__(self, files):
         with open (os.sep.join([files, "attributes.json"]), 'r') as conf:
             self.config = json.load(conf)
         
         self.name = self.config["name"]
+        self.actions = {} 
         
-        self.appear_file = os.sep.join([files, "appear.gif"])
-        self.appear_gif = Monster.get_gif(self.appear_file)
-        self.appear_txt = self.config["appears"]
+        for action, triggers in self.config["actions"].items():
+            if action not in self.actions:
+                self.actions[action] = {"gif":None, "txt":None, "triggers":None}
 
-        self.attack_file = os.sep.join([files, "attack.gif"])
-        self.attack_gif = Monster.get_gif(self.attack_file)
-        self.attack_txt = self.config["attacks"]
+            gif_name = ".".join([action, "gif"])
+            gif_path = os.sep.join([files, gif_name])
+            self.actions[action]["gif"] = Monster.get_gif(gif_path)
 
+            txt_name = ".".join([action, "txt"])
+            txt_path = os.sep.join([files, txt_name])
+            self.actions[action]["txt"] = Monster.get_txt(txt_path)
 
-    def appears(self):
+    def action(self, action):
         action = {}
-        action["message"] = self.appear_txt
-        action["picture"] = self.appear_gif
+        action["message"] = choice(self.actions[action][txt])
+        action["picture"] = self.actions[action][gif]
         return action
-
-    def attacks(self):
-        action = {}
-        action["message"] = self.attack_txt
-        action["picture"] = self.attack_gif
-        return action
-
 
 class MeatMonsters(object):
     
@@ -58,13 +67,14 @@ class MeatMonsters(object):
 
         self.fingerprint = "thisisthemeatmonsterfingerprint"
         self.debug = True
-        self.monsters = []
+        self.monsters = {}
         self.load_monsters()
 
     def load_monsters(self):
-        for monster_name in os.walk(self.monsters_dir).next()[1]:
-            monster_dir = os.sep.join([self.monsters_dir, monster_name])
-            self.monsters.append(Monster(name=monster_name, files=monster_dir))
+        for monster_subdir in os.walk(self.monsters_dir).next()[1]:
+            monster_path = os.sep.join([self.monsters_dir, monster_subdir])
+            monster = Monster(files=monster_path)
+            self.monsters[monster.name] = monster
 
     def run (self):
         if self.debug:
@@ -94,13 +104,6 @@ class MeatMonsters(object):
     def on_message(self, *args):
         post = self.get_post (args[0])
         print post['message']
-        if post['message'] == '!summon':
-            monster = choice(self.monsters)
-            self.send_message (monster.appear_txt, monster.appear_gif)
-        if post['message'] == '!attack':
-            monster = choice(self.monsters)
-            self.send_message (monster.attack_txt, monster.attack_gif)
-
 
 if __name__ == '__main__':
     game = MeatMonsters()
