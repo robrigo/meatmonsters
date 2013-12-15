@@ -11,13 +11,6 @@ from socketIO_client import SocketIO
 class Monster(object):
    
     @staticmethod
-    def random_text (action):
-        source_file = ".".join([action, "txt"])
-        with open (filename, "r") as source_file:
-            lines = [line.rstrip() for line in source_file.read()]
-            return choice(lines)
-
-    @staticmethod
     def get_gif (filename):
         with open (filename, "rb") as image_file:
             data =  base64.b64encode(image_file.read())
@@ -27,7 +20,7 @@ class Monster(object):
     @staticmethod
     def get_txt (filename):
         with open (filename, "r") as text_file:
-            lines = [line.rstrip() for line in text_file.read()]
+            lines = [line.rstrip() for line in text_file.readlines()]
         return lines
 
     def __init__(self, files):
@@ -48,14 +41,16 @@ class Monster(object):
 
             txt_name = ".".join([action, "txt"])
             txt_path = os.sep.join([files, txt_name])
-            print txt_path
             self.actions[action]["txt"] = Monster.get_txt(txt_path)
+            print self.actions[action]["txt"]
 
             for trigger in triggers:
                 compiled = re.compile(trigger)
                 self.triggers[compiled] = {"monster":self.name, "action":action}
 
     def action(self, action):
+        print "ACTION"
+        print self.actions[action]["txt"]
         values = {}
         values["message"] = choice(self.actions[action]["txt"])
         values["picture"] = self.actions[action]["gif"]
