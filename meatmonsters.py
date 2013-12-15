@@ -9,9 +9,15 @@ from random import choice
 from socketIO_client import SocketIO
 
 class Monster(object):
-   
+    """
+    A Monster is a bot instance, created from a directory containing an attributes.json
+    file plus a collection of gifs and text files for each defined action.
+    """
+
     @staticmethod
     def get_gif (filename):
+        """get a gif from the filesystem and base64 encode it"""
+
         with open (filename, "rb") as image_file:
             data =  base64.b64encode(image_file.read())
             gif = "data:image/gif;base64," + data
@@ -19,11 +25,15 @@ class Monster(object):
 
     @staticmethod
     def get_txt (filename):
+        """create a collection from a text file"""
+
         with open (filename, "r") as text_file:
             lines = [line.rstrip() for line in text_file.readlines()]
         return lines
 
     def __init__(self, files):
+        """initialize a bot from a directory"""
+
         with open (os.sep.join([files, "attributes.json"]), 'r') as conf:
             self.config = json.load(conf)
         
@@ -42,24 +52,28 @@ class Monster(object):
             txt_name = ".".join([action, "txt"])
             txt_path = os.sep.join([files, txt_name])
             self.actions[action]["txt"] = Monster.get_txt(txt_path)
-            print self.actions[action]["txt"]
 
             for trigger in triggers:
                 compiled = re.compile(trigger)
                 self.triggers[compiled] = {"monster":self.name, "action":action}
 
     def action(self, action):
-        print "ACTION"
-        print self.actions[action]["txt"]
+        """return information for a called action"""
+
         values = {}
         values["message"] = choice(self.actions[action]["txt"])
         values["picture"] = self.actions[action]["gif"]
         return values
 
 class MeatMonsters(object):
-    
+    """
+    MeatMonsters is a framework for loading a collection of Monsters,
+    connecting them to meatspace and dispatching commands to them
+    """
+
     def __init__(self):
-        
+        """initialize a MeatMonsters collection from a config file"""
+
         with open ('meatmonsters.json', 'r') as conf:
             self.config = json.load(conf)
 
@@ -74,6 +88,8 @@ class MeatMonsters(object):
         self.load_monsters()
 
     def load_monsters(self):
+        """load all monsters from monster subdirectory"""
+
         for monster_subdir in os.walk(self.monsters_dir).next()[1]:
             monster_path = os.sep.join([self.monsters_dir, monster_subdir])
             monster = Monster(files=monster_path)
@@ -81,21 +97,17 @@ class MeatMonsters(object):
             for trigger, action in monster.triggers.items():
                 self.triggers[trigger] = action
 
-    def run (self):
-        if self.debug:
-            print "Listening to %s" % self.address
-
-        with SocketIO(self.address) as socketIO_listen:
-            socketIO_listen.on('message', self.on_message)
-            socketIO_listen.wait()
-
     def get_post (self, data):
+        """extract wanted information from meatspace post"""
+
         post = {}
         post["key"] = data["chat"]["key"]
         post["message"] = data["chat"]["value"]["message"]
         return post
 
     def get_message (self, reply, image):
+        """given a reply string and an image, construct a response"""
+
         message = {}
         message ['apiKey'] = self.api_key
         message ['message'] = reply
@@ -104,15 +116,29 @@ class MeatMonsters(object):
         return message
 
     def send_message (self, reply, image):
+        """send a message to meatspace"""
+
         SocketIO(self.address).emit('message', self.get_message(reply, image))
 
     def on_message(self, *args):
+        """handles incoming messages from meatspace"""
+
         post = self.get_post (args[0])
         print post['message']
         for trigger, action in self.triggers.items():
             if trigger.match(post['message']):
                 values = self.monsters[action['monster']].action(action['action'])
                 self.send_message(values["message"], values["picture"])
+
+    def run (self):
+        """start the monsters!"""
+
+        if self.debug:
+            print "Listening to %s" % self.address
+
+        with SocketIO(self.address) as socketIO_listen:
+            socketIO_listen.on('message', self.on_message)
+            socketIO_listen.wait()
 
 if __name__ == '__main__':
     game = MeatMonsters()
