@@ -27,7 +27,8 @@ class Monster(object):
     @staticmethod
     def get_txt (filename):
         with open (filename, "r") as text_file:
-            return text_file.read()
+            lines = [line.rstrip() for line in text_file.read()]
+        return lines
 
     def __init__(self, files):
         with open (os.sep.join([files, "attributes.json"]), 'r') as conf:
@@ -35,10 +36,11 @@ class Monster(object):
         
         self.name = self.config["name"]
         self.actions = {} 
+        self.triggers = {}
         
         for action, triggers in self.config["actions"].items():
             if action not in self.actions:
-                self.actions[action] = {"gif":None, "txt":None, "triggers":None}
+                self.actions[action] = {"gif":None, "txt":None}
 
             gif_name = ".".join([action, "gif"])
             gif_path = os.sep.join([files, gif_name])
@@ -46,13 +48,18 @@ class Monster(object):
 
             txt_name = ".".join([action, "txt"])
             txt_path = os.sep.join([files, txt_name])
+            print txt_path
             self.actions[action]["txt"] = Monster.get_txt(txt_path)
 
+            for trigger in triggers:
+                compiled = re.compile(trigger)
+                self.triggers[compiled] = {"monster":self.name, "action":action}
+
     def action(self, action):
-        action = {}
-        action["message"] = choice(self.actions[action][txt])
-        action["picture"] = self.actions[action][gif]
-        return action
+        values = {}
+        values["message"] = choice(self.actions[action]["txt"])
+        values["picture"] = self.actions[action]["gif"]
+        return values
 
 class MeatMonsters(object):
     
@@ -68,6 +75,7 @@ class MeatMonsters(object):
         self.fingerprint = "thisisthemeatmonsterfingerprint"
         self.debug = True
         self.monsters = {}
+        self.triggers = {}
         self.load_monsters()
 
     def load_monsters(self):
@@ -75,6 +83,8 @@ class MeatMonsters(object):
             monster_path = os.sep.join([self.monsters_dir, monster_subdir])
             monster = Monster(files=monster_path)
             self.monsters[monster.name] = monster
+            for trigger, action in monster.triggers.items():
+                self.triggers[trigger] = action
 
     def run (self):
         if self.debug:
@@ -104,6 +114,10 @@ class MeatMonsters(object):
     def on_message(self, *args):
         post = self.get_post (args[0])
         print post['message']
+        for trigger, action in self.triggers.items():
+            if trigger.match(post['message']):
+                values = self.monsters[action['monster']].action(action['action'])
+                self.send_message(values["message"], values["picture"])
 
 if __name__ == '__main__':
     game = MeatMonsters()
