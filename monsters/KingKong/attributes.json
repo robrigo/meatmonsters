@@ -1,5 +1,6 @@
 {
     "name" : "King Kong",
     "appears" : "A wild King Kong appears!",
-    "attacks" : "ROAAAAAAAAAAR!"
+    "attacks" : "ROAAAAAAAAAAR!",
+    "triggers" : [{"[Kk]ing ?[Kk]ong":"appear"},{"attacks":"attack"}]
 }

@@ -1,5 +1,6 @@
 {
     "name" : "Godzilla",
     "appears" : "A wild Godzilla appears!",
-    "attacks" : "SKREEEEEEEEEAAAAAONGK!"
+    "attacks" : "SKREEEEEEEEEAAAAAONGK!",
+    "triggers" : [{"[Gg]odzilla":"appear"}, {"[Aa]ttack":"attack"}]
 }

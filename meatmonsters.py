@@ -18,11 +18,32 @@ class Monster(object):
             return gif
 
     def __init__(self, name, files):
-        self.name = name
+        with open (os.sep.join([files, "attributes.json"]), 'r') as conf:
+            self.config = json.load(conf)
+        
+        self.name = self.config["name"]
+        
         self.appear_file = os.sep.join([files, "appear.gif"])
-        self.attack_file = os.sep.join([files, "attack.gif"])
         self.appear_gif = Monster.get_gif(self.appear_file)
+        self.appear_txt = self.config["appears"]
+
+        self.attack_file = os.sep.join([files, "attack.gif"])
         self.attack_gif = Monster.get_gif(self.attack_file)
+        self.attack_txt = self.config["attacks"]
+
+
+    def appears(self):
+        action = {}
+        action["message"] = self.appear_txt
+        action["picture"] = self.appear_gif
+        return action
+
+    def attacks(self):
+        action = {}
+        action["message"] = self.attack_txt
+        action["picture"] = self.attack_gif
+        return action
+
 
 class MeatMonsters(object):
     
@@ -75,10 +96,10 @@ class MeatMonsters(object):
         print post['message']
         if post['message'] == '!summon':
             monster = choice(self.monsters)
-            self.send_message ("SKREEEEEEEEEONGK!", monster.appear_gif)
+            self.send_message (monster.appear_txt, monster.appear_gif)
         if post['message'] == '!attack':
             monster = choice(self.monsters)
-            self.send_message ("SKREEEEEEEEEONGK!", monster.attack_gif)
+            self.send_message (monster.attack_txt, monster.attack_gif)
 
 
 if __name__ == '__main__':
