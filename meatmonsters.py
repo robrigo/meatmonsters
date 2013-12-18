@@ -55,7 +55,7 @@ class Monster(object):
             self.actions[action]["txts"] = Monster.get_txt(txt_path)
 
             for trigger in triggers:
-                compiled = re.compile(trigger)
+                compiled = re.compile(trigger, re.IGNORECASE)
                 self.triggers[compiled] = {"monster":self.name, "action":action}
 
     def action(self, action):
@@ -127,7 +127,7 @@ class MeatMonsters(object):
         post = self.get_post (args[0])
         print post['message']
         for trigger, action in self.triggers.items():
-            if trigger.match(post['message']):
+            if trigger.search(post['message']):
                 values = self.monsters[action['monster']].action(action['action'])
                 self.send_message(values["message"], values["picture"])
 
