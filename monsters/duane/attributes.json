@@ -1,0 +1,6 @@
+{
+    "name" : "Duane",
+    "actions" : {
+            "duane":["^!duane"]
+    }
+} 
