@@ -1,6 +1,0 @@
-{
-    "name" : "OopsBot",
-    "actions" : {
-            "oops":["^!oops"]
-    }
-} 
