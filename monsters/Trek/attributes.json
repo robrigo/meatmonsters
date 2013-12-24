@@ -1,8 +1,8 @@
 {
     "name" : "TrekBot",
     "actions" : {
-            "oops":["!oops"],
+            "oops":["\\!oops"],
             "tell":["[tT]ell [mM]e [mM]ore"],
-            "out":["!out"]
+            "out":["\\!out"]
     }
 } 
