@@ -1,0 +1,7 @@
+{
+    "name" : "Moot",
+    "actions" : {
+            "moot":["\\!moot"],
+            "happening":["\\!happening"]
+    }
+} 

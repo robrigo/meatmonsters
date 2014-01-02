@@ -86,6 +86,7 @@ class MeatMonsters(object):
         self.debug = True
         self.monsters = {}
         self.triggers = {}
+        self.count = 0
         self.load_monsters()
 
     def load_monsters(self):
@@ -123,13 +124,13 @@ class MeatMonsters(object):
 
     def on_message(self, *args):
         """handles incoming messages from meatspace"""
-
-        post = self.get_post (args[0])
-        print post['message']
-        for trigger, action in self.triggers.items():
-            if trigger.search(post['message']):
-                values = self.monsters[action['monster']].action(action['action'])
-                self.send_message(values["message"], values["picture"])
+        self.count = self.count + 1
+        if self.count > 10:
+            post = self.get_post (args[0])
+            for trigger, action in self.triggers.items():
+                if trigger.search(post['message']):
+                    values = self.monsters[action['monster']].action(action['action'])
+                    self.send_message(values["message"], values["picture"])
 
     def run (self):
         """start the monsters!"""
