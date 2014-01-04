@@ -5,6 +5,6 @@
             "happening":["\\!happening"],
             "dangerzone":["\\!dangerzone"],
             "bird":["\\!bird"],
-            "hotdog":["hotdog"]
+            "hotdog":["\\!hotdog"]
     }
 } 

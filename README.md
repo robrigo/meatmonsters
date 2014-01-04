@@ -1,4 +1,4 @@
 meatmonsters
 ============
 
-A little game for chat.meatspac.es
+Home of the infamous !hotdog bot.
