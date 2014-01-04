@@ -64,6 +64,7 @@ class Monster(object):
         values = {}
         values["message"] = choice(self.actions[action]["txts"])
         values["picture"] = choice(self.actions[action]["gifs"])
+        values["fingerprint"] = self.name.zfill(32)
         return values
 
 class MeatMonsters(object):
@@ -82,7 +83,6 @@ class MeatMonsters(object):
         self.address = self.config["address"]
         self.monsters_dir = "./monsters/"
 
-        self.fingerprint = "thisisthemeatmonsterfingerprint"
         self.debug = True
         self.monsters = {}
         self.triggers = {}
@@ -107,20 +107,20 @@ class MeatMonsters(object):
         post["message"] = data["chat"]["value"]["message"]
         return post
 
-    def get_message (self, reply, image):
+    def get_message (self, reply, image, fingerprint):
         """given a reply string and an image, construct a response"""
 
         message = {}
         message ['apiKey'] = self.api_key
         message ['message'] = reply
-        message ['fingerprint'] = self.fingerprint
+        message ['fingerprint'] = fingerprint
         message ['picture'] = image
         return message
 
-    def send_message (self, reply, image):
+    def send_message (self, reply, image, fingerprint):
         """send a message to meatspace"""
 
-        SocketIO(self.address).emit('message', self.get_message(reply, image))
+        SocketIO(self.address).emit('message', self.get_message(reply, image, fingerprint))
 
     def on_message(self, *args):
         """handles incoming messages from meatspace"""
@@ -130,7 +130,7 @@ class MeatMonsters(object):
             for trigger, action in self.triggers.items():
                 if trigger.search(post['message']):
                     values = self.monsters[action['monster']].action(action['action'])
-                    self.send_message(values["message"], values["picture"])
+                    self.send_message(values["message"], values["picture"], values["fingerprint"])
 
     def run (self):
         """start the monsters!"""
