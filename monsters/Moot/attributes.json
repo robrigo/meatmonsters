@@ -2,6 +2,9 @@
     "name" : "Moot",
     "actions" : {
             "moot":["\\!moot"],
-            "happening":["\\!happening"]
+            "happening":["\\!happening"],
+            "dangerzone":["\\!dangerzone"],
+            "bird":["\\!bird"],
+            "hotdog":["hotdog"]
     }
 } 
